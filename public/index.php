@@ -3,8 +3,9 @@
     require_once "../vendor/autoload.php";
 
     use Medoo\Medoo as Medoo;
+    use Particle\Validator\Validator as Validator;
 
-    echo "Hello world!";
+    
 
     $file = "../storage/database.db";
     if ( is_writable("../storage/database.local.db") ) {
@@ -22,21 +23,36 @@
 
         $comment = new SitePoint\Comment($database);
 
-        $comment->setEmail('rand@email.com')->setName("Joe Doe")->SetComment('It works! Hell Yeah!')->save();    
-    } catch ( InvalidArgumentException $ia) {
-        echo $ia->getMessage();
+        // $comment->setEmail('rand@email.com')->setName("Joe Doe")->SetComment('It works! Hell Yeah!')->save();    
     } catch ( Exception $e ) {
         echo $e->getMessage();
     }
     
+    $v = new Validator();
+    $v->required('name')->lengthBetween(1, 100)->alnum(true);
+    $v->required('email')->email()->lengthBetween(5, 255);
+    $v->required('comment')->lengthBetween(10, null);
 
+    $result = $v->validate($_POST);
 
-    //dump($database);
-    // $array = [1, "apple", 2, "foo", "bar"];
-    // var_dump($array);
+    if ( $result->isValid())  {
+        
+        try {
+            $comment->setName($_POST['name'])
+            ->setEmail($_POST['email'])
+            ->setComment($_POST['comment'])
+            ->save();
 
-    // dump($array);
+            header('Location: /');
+            return;
 
+        } catch ( Exception $e) {
+            die($e->getMessage());
+        }
+
+    } else {
+        //dump($result->getMessages());
+    }
 ?>
 <!doctype html>
 <html class="no-js" lang="">
@@ -52,6 +68,7 @@
 
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/custom.css">
         <script src="js/vendor/modernizr-2.8.3.min.js"></script>
     </head>
     <body>
@@ -60,10 +77,25 @@
         <![endif]-->
 
         <!-- Add your site or application content here -->
-        <form action="post">
+
+        <!-- Display comments -->
+        <?php foreach($comment->findAll() as $comment) : ?>
+            <div class="comment">                    
+                <h3>
+
+                     On <?= $comment->getSubmissionDate() ?> , <?= $comment->getName() ?> wrote: 
+
+                </h3>
+
+                <p><?=  $comment->getComment(); ?></p>
+            </div>
+        <?php endforeach; ?>
+
+        <!-- Submit comment form -->
+        <form method="post">
             <label for="">Name: <input type="text" name="name" placeholder="Your name"></label>
-            <label for="">Email:<input type="email" name="email" placeholder="your@email.com"></label>
-            <label for="">Comment: <textarea name="" id="" cols="30" rows="10"></textarea> 
+            <label for="">Email:<input type="text" name="email" placeholder="your@email.com"></label>
+            <label for="">Comment: <textarea name="comment" id="" cols="30" rows="10"></textarea> 
             </label>
             <input type="submit" value="save">
         </form>
@@ -84,3 +116,4 @@
         </script>
     </body>
 </html>
+
