@@ -2,7 +2,7 @@
 
     require_once "../vendor/autoload.php";
 
-    use Medoo\Medoo;
+    use Medoo\Medoo as Medoo;
 
     echo "Hello world!";
 
@@ -11,6 +11,21 @@
         'database_file' => '../storage/database.db'
     ]);
 
+
+
+    try {
+
+        $comment = new SitePoint\Comment($database);
+
+        $comment->setEmail('rand@email.com')->setName("Joe Doe")->SetComment('It works!')->SetComment('Hoorat! Saving comments works!')->save();    
+    } catch ( InvalidArgumentException $ia) {
+        echo $ia->getMessage();
+    } catch ( Exception $e ) {
+        echo $e->getMessage();
+    }
+    
+
+    
     //dump($database);
     // $array = [1, "apple", 2, "foo", "bar"];
     // var_dump($array);
