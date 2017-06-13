@@ -6,9 +6,14 @@
 
     echo "Hello world!";
 
+    $file = "../storage/database.db";
+    if ( is_writable("../storage/database.local.db") ) {
+        $file = "../storage/database.local.db";
+    }
+
     $database = new Medoo([
         'database_type' => 'sqlite',
-        'database_file' => '../storage/database.db'
+        'database_file' => $file
     ]);
 
 
@@ -17,7 +22,7 @@
 
         $comment = new SitePoint\Comment($database);
 
-        $comment->setEmail('rand@email.com')->setName("Joe Doe")->SetComment('It works!')->SetComment('Hoorat! Saving comments works!')->save();    
+        $comment->setEmail('rand@email.com')->setName("Joe Doe")->SetComment('It works! Hell Yeah!')->save();    
     } catch ( InvalidArgumentException $ia) {
         echo $ia->getMessage();
     } catch ( Exception $e ) {
@@ -25,7 +30,7 @@
     }
     
 
-    
+
     //dump($database);
     // $array = [1, "apple", 2, "foo", "bar"];
     // var_dump($array);
